@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches: [ main ]
+
+env:
+  JAVA_VERSION: 17
+  MAVEN_SETTINGS: .github/settings.xml
+
+jobs:
+  # We will extract the necessary maven properties in order to have Maven as our single
+  # source of truth
+  info:
+    name: Retrieve Maven properties
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      groupId: ${{ steps.maven-properties.outputs.groupId }}
+      artifactId: ${{ steps.maven-properties.outputs.artifactId }}
+      version: ${{ steps.maven-properties.outputs.version }}
+      localRepository: ${{ steps.maven-properties.outputs.localRepository }}
+      groupIdRepositoryPath: ${{ steps.maven-properties.outputs.groupIdRepositoryPath }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Update Maven Settings
+        run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
+
+      # Using pwsh here, since it is much more usable than bash - especially for safe path building
+      - name: Extract Maven Properties
+        id: maven-properties
+        shell: pwsh
+        run: |
+          $groupId = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.groupId' -q -DforceStdout)
+          echo "Group ID: $groupId"
+
+          $artifactId = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.artifactId' -q -DforceStdout)
+          echo "Artifact ID: $artifactId"
+
+          $version = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.version' -q -DforceStdout)
+          echo "Version: $version"
+
+          $localRepository = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=settings.localRepository' -q -DforceStdout)
+          echo "Local Repository: $localRepository"
+
+          $groupIdRepositoryPath = Join-Path -Path $localRepository -ChildPath $groupId.replace('.', '/')
+          echo "Local Repository Path for Group: $groupIdRepositoryPath"
+
+          echo "::set-output name=groupId::$groupId"
+          echo "::set-output name=artifactId::$artifactId"
+          echo "::set-output name=version::$version"
+          echo "::set-output name=localRepository::$localRepository"
+          echo "::set-output name=groupIdRepositoryPath::$groupIdRepositoryPath"
+
+  build:
+    name: Maven Build
+
+    needs: [ info ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Update Maven Settings
+        run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
+
+      - name: Cache Maven packages
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ needs.info.outputs.localRepository }}
+          key: cache-1-${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: cache-1-${{ runner.os }}-m2
+
+      # No Snapshot Updates, Batch Mode, Show errors and skip tests
+      - name: Build Project
+        run: mvn clean install -nsu -B -e -DskipTests -file pom.xml
+
+      # Upload the built artifacts
+      - name: Store Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: maven-artifacts.zip
+          retention-days: 2
+          path: |
+            ${{ needs.info.outputs.groupIdRepositoryPath }}
+            !${{ needs.info.outputs.groupIdRepositoryPath }}/**/*.tar.gz
+
+      # But don't cache them
+      - name: Remove Artifacts before caching
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: rm -rf ${{ needs.info.outputs.groupIdRepositoryPath }}
+
+  unit-test:
+    name: Unit Tests
+
+    needs: [ info, build ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Update Maven Settings
+        run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ${{ needs.info.outputs.groupIdRepositoryPath }}/
+          name: maven-artifacts.zip
+
+      - name: Run unit tests
+        run: |
+          if ! mvn install -nsu -B -f pom.xml; then
+            find . -path '*/target/surefire-reports/*.xml' | zip -q reports-unit-tests.zip -@
+            exit 1
+          fi
+
+      - name: Unit test reports
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: reports-unit-tests
+          retention-days: 14
+          path: reports-unit-tests.zip
+          if-no-files-found: ignore
+
+
+  analyze:
+    name: Analyze
+
+    needs: [ info, build ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Update Maven Settings
+        run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ${{ needs.info.outputs.groupIdRepositoryPath }}/
+          name: maven-artifacts.zip
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Analyze with Sonar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -nsu -DskipTests -B -f pom.xml verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=tobi6112_trunk-based-development-example
