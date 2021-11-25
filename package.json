@@ -2,6 +2,8 @@
   "name": "trunk-based-development-example",
   "version": "1.0.0",
   "devDependencies": {
+    "@commitlint/cli": "^15.0.0",
+    "@commitlint/config-conventional": "^15.0.0",
     "husky": "^7.0.4"
   },
   "scripts": {
