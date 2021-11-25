@@ -9,8 +9,5 @@
         <module name="tbd-example" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="tbd-example" target="1.7" />
-    </bytecodeTargetLevel>
   </component>
 </project>
