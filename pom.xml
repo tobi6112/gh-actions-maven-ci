@@ -162,7 +162,10 @@
                 <removeUnusedImports />
               </java>
               <pom>
-                <sortPom />
+                <sortPom>
+                  <expandEmptyElements>false</expandEmptyElements>
+                  <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+                </sortPom>
               </pom>
             </configuration>
             <executions>
