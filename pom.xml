@@ -4,7 +4,7 @@
 
   <groupId>com.github.tobi6112</groupId>
   <artifactId>gh-actions-maven-ci</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0</version>
 
   <name>gh-actions-maven-ci</name>
   <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
@@ -18,7 +18,7 @@
   <scm>
     <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
     <developerConnection>scm:git:ssh://git@github.com/tobi6112/gh-actions-maven-ci</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v0.2.0</tag>
   </scm>
 
   <dependencies>
@@ -123,11 +123,11 @@
                   <version>1.13.0</version>
                 </googleJavaFormat>
 
-                <importOrder></importOrder>
-                <removeUnusedImports></removeUnusedImports>
+                <importOrder />
+                <removeUnusedImports />
               </java>
               <pom>
-                <sortPom></sortPom>
+                <sortPom />
               </pom>
             </configuration>
             <executions>
