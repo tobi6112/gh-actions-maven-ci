@@ -60,7 +60,7 @@ jobs:
           echo "::set-output name=groupIdRepositoryPath::$groupIdRepositoryPath"
 
   build:
-    name: Maven Build
+    name: Maven Compile
 
     needs: [ info ]
 
@@ -90,22 +90,16 @@ jobs:
 
       # No Snapshot Updates, Batch Mode, Show errors and skip tests
       - name: Build Project
-        run: mvn clean install -nsu -B -e -DskipTests
+        run: mvn clean compile -nsu -B -e
 
       # Upload the built artifacts
       - name: Store Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: maven-artifacts.zip
+          name: maven-target.zip
           retention-days: 2
           path: |
-            ${{ needs.info.outputs.groupIdRepositoryPath }}
-            !${{ needs.info.outputs.groupIdRepositoryPath }}/**/*.tar.gz
-
-      # But don't cache them
-      - name: Remove Artifacts before caching
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: rm -rf ${{ needs.info.outputs.groupIdRepositoryPath }}
+            ./target/**
 
   unit-test:
     name: Unit Tests
@@ -128,15 +122,15 @@ jobs:
       - name: Update Maven Settings
         run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
 
-      - name: Download built artifacts
+      - name: Download build
         uses: actions/download-artifact@v2
         with:
-          path: ${{ needs.info.outputs.groupIdRepositoryPath }}/
-          name: maven-artifacts.zip
+          path: ./target
+          name: maven-target.zip
 
       - name: Run unit tests
         run: |
-          if ! mvn install -nsu -B; then
+          if ! mvn test -nsu -B; then
             find . -path '*/target/surefire-reports/*.xml' | zip -q reports-unit-tests.zip -@
             exit 1
           fi
@@ -170,12 +164,6 @@ jobs:
 
       - name: Update Maven Settings
         run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
-
-      - name: Download built artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: ${{ needs.info.outputs.groupIdRepositoryPath }}/
-          name: maven-artifacts.zip
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
@@ -238,11 +226,11 @@ jobs:
       - name: Update Maven Settings
         run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
 
-      - name: Download built artifacts
+      - name: Download build
         uses: actions/download-artifact@v2
         with:
-          path: ${{ needs.info.outputs.groupIdRepositoryPath }}/
-          name: maven-artifacts.zip
+          path: ./target
+          name: maven-target.zip
 
       - name: Build and Push Docker Image
         env:
