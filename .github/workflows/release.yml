@@ -33,7 +33,7 @@ jobs:
         run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
 
       - name: Prepare Release
-        run: mvn -B -Prelease -DpushChanges=false -DdryRun=false conventional-commits:version release:prepare
+        run: mvn -B -Prelease -DdryRun=false conventional-commits:version release:prepare
 
       - name: Perform Release
         env:
@@ -41,7 +41,6 @@ jobs:
           DOCKER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: mvn -B -Prelease -DdryRun=false release:perform
 
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-        run: git push
+      - name: Rollback Release
+        if: ${{ failure() }}
+        run: mvn -B -Prelease release:rollback
