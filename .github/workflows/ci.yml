@@ -26,18 +26,10 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
+          cache: 'maven'
 
       - name: Update Maven Settings
         run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
-
-      - name: Cache Maven packages
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ${{ needs.info.outputs.localRepository }}
-          key: cache-1-${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: cache-1-${{ runner.os }}-m2
 
       # No Snapshot Updates, Batch Mode, Show errors and skip tests
       - name: Build Project
