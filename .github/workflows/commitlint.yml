@@ -4,7 +4,9 @@
 name: Commit Convention Check
 
 on:
-  pull_request: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   commitlint:
