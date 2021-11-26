@@ -17,14 +17,22 @@ jobs:
       - name: Get the version
         id: get_version
         run: |
-          echo ::set-output name=raw_version::${GITHUB_REF/refs\/tags\//}
-          echo ::set-output name=version::${GITHUB_REF/refs\/tags\/v/}
+          $rawVersion = ${GITHUB_REF/refs\/tags\//}
+          $version = ${rawVersion/v/}
+
+          echo "Raw Tag version: $rawVersion"
+          echo "Tag version: $version"
+
+          echo "::set-output name=version::$rawVersion"
+          echo "::set-output name=version::$version"
       - name: Extract Version Properties
         id: versions
         run: |
           $pomVersion = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.version' -q -DforceStdout)
-          echo "Version: $version"
-          echo "::set-output name=$pomVersion::$pomVersion"
+
+          echo "Version: $pomVersion"
+
+          echo "::set-output name=pomVersion::$pomVersion"
       - name: Check version consistency
         run: |
           if [ "${{ steps.versions.outputs.pomVersion }}" != "${{ steps.versions.outputs.version }}" ]; then
