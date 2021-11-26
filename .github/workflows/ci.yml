@@ -90,7 +90,7 @@ jobs:
 
       # No Snapshot Updates, Batch Mode, Show errors and skip tests
       - name: Build Project
-        run: mvn clean install -nsu -B -e -DskipTests -file pom.xml
+        run: mvn clean install -nsu -B -e -DskipTests
 
       # Upload the built artifacts
       - name: Store Artifacts
@@ -136,7 +136,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          if ! mvn install -nsu -B -f pom.xml; then
+          if ! mvn install -nsu -B; then
             find . -path '*/target/surefire-reports/*.xml' | zip -q reports-unit-tests.zip -@
             exit 1
           fi
@@ -191,4 +191,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -nsu -DskipTests -B -f pom.xml verify
+        run: mvn -nsu -DskipTests -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
