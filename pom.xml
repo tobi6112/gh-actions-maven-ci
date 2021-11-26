@@ -10,7 +10,7 @@
   <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
 
   <scm>
-    <developerConnection>scm:git:ssh://git@github.com/tobi6112/gh-actions-maven-ci</developerConnection>
+    <developerConnection>scm:git:https://github.com/tobi6112/gh-actions-maven-ci.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
   </scm>
