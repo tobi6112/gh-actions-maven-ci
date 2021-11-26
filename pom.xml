@@ -8,9 +8,8 @@
   <artifactId>gh-actions-maven-ci</artifactId>
   <version>0.1.0-SNAPSHOT</version>
 
-  <name>tbd-example</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <name>gh-actions-maven-ci</name>
+  <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
