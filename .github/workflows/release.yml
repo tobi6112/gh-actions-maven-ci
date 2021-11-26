@@ -15,27 +15,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Get the version
-        id: get_version
         run: |
-          $rawVersion = ${GITHUB_REF/refs\/tags\//}
-          $version = ${rawVersion/v/}
-
-          echo "Raw Tag version: $rawVersion"
-          echo "Tag version: $version"
-
-          echo "::set-output name=version::$rawVersion"
-          echo "::set-output name=version::$version"
+          echo "TAG_RAW=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+          echo "TAG_VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
       - name: Extract Version Properties
         id: versions
         run: |
-          $pomVersion = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.version' -q -DforceStdout)
-
-          echo "Version: $pomVersion"
-
-          echo "::set-output name=pomVersion::$pomVersion"
+          echo "MAVEN_PROJECT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.version' -q -DforceStdout)" >> $GITHUB_ENV
       - name: Check version consistency
         run: |
-          if [ "${{ steps.versions.outputs.pomVersion }}" != "${{ steps.versions.outputs.version }}" ]; then
+          if [ "${{ env.MAVEN_PROJECT_VERSION }}" != "${{ env.TAG_VERSION }}" ]; then
             >&2 echo "Tag version does not match the specified versions in Maven"
             exit 1
           fi
