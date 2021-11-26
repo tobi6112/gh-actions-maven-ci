@@ -4,14 +4,14 @@
 
   <groupId>com.github.tobi6112</groupId>
   <artifactId>gh-actions-maven-ci</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.1.2</version>
 
   <name>gh-actions-maven-ci</name>
   <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
 
   <scm>
     <developerConnection>scm:git:https://github.com/tobi6112/gh-actions-maven-ci.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v0.1.2</tag>
     <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
   </scm>
 
