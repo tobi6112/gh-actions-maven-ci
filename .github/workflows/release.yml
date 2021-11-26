@@ -1,4 +1,4 @@
-name: Commit Convention Check
+name: Release new version
 
 on:
   workflow_dispatch:
