@@ -88,7 +88,54 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>2.17.4</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>checkstyle</id>
+      <activation>
+        <property>
+          <name>checkstyle</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.diffplug.spotless</groupId>
+            <artifactId>spotless-maven-plugin</artifactId>
+            <version>2.17.4</version>
+            <configuration>
+              <ratchetFrom>origin/main</ratchetFrom>
+              <java>
+                <googleJavaFormat>
+                  <version>1.13.0</version>
+                </googleJavaFormat>
+
+                <importOrder />
+                <removeUnusedImports />
+              </java>
+              <pom>
+                <sortPom />
+              </pom>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
