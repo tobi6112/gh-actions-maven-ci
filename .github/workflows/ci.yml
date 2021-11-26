@@ -160,8 +160,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v2
@@ -202,8 +200,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v2
@@ -217,3 +213,39 @@ jobs:
 
       - name: Spotless Check
         run: mvn -nsu -DskipTests -B -Pcheckstyle spotless:check
+
+  snapshot-release:
+    name: Perform Snapshot Release
+
+    # Not on Pull Requests, but on push
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+    needs: [ info, build, checkstyle, analyze, unit-test ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Update Maven Settings
+        run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ${{ needs.info.outputs.groupIdRepositoryPath }}/
+          name: maven-artifacts.zip
+
+      - name: Build and Push Docker Image
+        env:
+          DOCKER_REGISTRY_USER: tobi6112
+          DOCKER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -nsu -B jib:build

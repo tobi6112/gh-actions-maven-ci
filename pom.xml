@@ -4,7 +4,7 @@
 
   <groupId>com.github.tobi6112</groupId>
   <artifactId>gh-actions-maven-ci</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
 
   <name>gh-actions-maven-ci</name>
   <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
@@ -13,6 +13,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <docker.image.prefix>ghcr.io</docker.image.prefix>
   </properties>
 
   <scm>
@@ -32,14 +33,11 @@
 
   <build>
     <pluginManagement>
-      <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
-        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
         </plugin>
-        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
           <version>3.0.2</version>
@@ -63,11 +61,16 @@
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.8.2</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
         </plugin>
-        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <version>3.7.1</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -104,6 +107,40 @@
 
   <profiles>
     <profile>
+      <id>docker</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>3.1.4</version>
+            <configuration>
+              <from>
+                <image>eclipse-temurin:17-jdk-alpine</image>
+              </from>
+              <to>
+                <image>${docker.image.prefix}/${project.groupId}/${project.artifactId}</image>
+                <tags>
+                  <tag>${project.version}</tag>
+                </tags>
+              </to>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>dockerBuild</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
       <id>checkstyle</id>
       <activation>
         <property>
@@ -123,11 +160,11 @@
                   <version>1.13.0</version>
                 </googleJavaFormat>
 
-                <importOrder />
-                <removeUnusedImports />
+                <importOrder></importOrder>
+                <removeUnusedImports></removeUnusedImports>
               </java>
               <pom>
-                <sortPom />
+                <sortPom></sortPom>
               </pom>
             </configuration>
             <executions>
@@ -157,7 +194,7 @@
             <configuration>
               <tagNameFormat>v@{project.version}</tagNameFormat>
               <allowTimestampedSnapshots>false</allowTimestampedSnapshots>
-              <scmCommentPrefix xml:space="preserve">ci: </scmCommentPrefix>
+              <scmCommentPrefix xml:space="preserve">build: </scmCommentPrefix>
             </configuration>
           </plugin>
           <plugin>

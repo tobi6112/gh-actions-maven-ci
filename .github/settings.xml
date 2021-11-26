@@ -4,6 +4,7 @@
   <activeProfiles>
     <activeProfile>ci</activeProfile>
     <activeProfile>checkstyle</activeProfile>
+    <activeProfile>docker</activeProfile>
   </activeProfiles>
   <profiles>
     <profile>
@@ -13,6 +14,8 @@
         <sonar.organization>tobi6112</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>tobi6112_gh-actions-maven-ci</sonar.projectKey>
+        <jib.to.auth.username>${env.DOCKER_REGISTRY_USER}</jib.to.auth.username>
+        <jib.to.auth.password>${env.DOCKER_REGISTRY_PASSWORD}</jib.to.auth.password>
       </properties>
 
     </profile>
