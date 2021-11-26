@@ -3,6 +3,10 @@ name: Release new version
 on:
   workflow_dispatch:
 
+env:
+  JAVA_VERSION: 17
+  MAVEN_SETTINGS: .github/settings.xml
+
 jobs:
   prepare-release:
     name: Prepare release
