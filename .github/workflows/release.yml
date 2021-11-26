@@ -1,0 +1,33 @@
+name: Commit Convention Check
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  verify-version:
+    name: Verify version equality to tags
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: |
+          echo ::set-output name=raw_version::${GITHUB_REF/refs\/tags\//}
+          echo ::set-output name=version::${GITHUB_REF/refs\/tags\/v/}
+      - name: Extract Version Properties
+        id: versions
+        run: |
+          $pomVersion = $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate '-Dexpression=project.version' -q -DforceStdout)
+          echo "Version: $version"
+          echo "::set-output name=$pomVersion::$pomVersion"
+      - name: Check version consistency
+        run: |
+          if [ "${{ steps.versions.outputs.pomVersion }}" != "${{ steps.versions.outputs.version }}" ]; then
+            >&2 echo "Tag version does not match the specified versions in Maven"
+            exit 1
+          fi
