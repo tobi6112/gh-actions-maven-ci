@@ -224,6 +224,13 @@
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <to>
+                <tags>
+                  <tag>latest</tag>
+                </tags>
+              </to>
+            </configuration>
           </plugin>
         </plugins>
       </build>
