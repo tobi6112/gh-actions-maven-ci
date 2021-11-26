@@ -31,6 +31,9 @@ jobs:
         run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
 
       - name: Prepare Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         run: mvn -B -Prelease -DdryRun=false conventional-commits:version release:prepare
 
       - name: Perform Release
