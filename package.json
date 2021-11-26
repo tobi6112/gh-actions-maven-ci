@@ -1,5 +1,5 @@
 {
-  "name": "trunk-based-development-example",
+  "name": "gh-actions-maven-ci",
   "version": "1.0.0",
   "devDependencies": {
     "@commitlint/cli": "^15.0.0",
