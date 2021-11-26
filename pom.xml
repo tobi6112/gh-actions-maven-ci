@@ -15,6 +15,12 @@
     <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
+  <scm>
+    <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
+    <developerConnection>scm:git:ssh://git@github.com/tobi6112/gh-actions-maven-ci</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -128,6 +134,43 @@
               <execution>
                 <goals>
                   <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>2.5.3</version>
+            <configuration>
+              <tagNameFormat>v@{project.version}</tagNameFormat>
+              <allowTimestampedSnapshots>false</allowTimestampedSnapshots>
+              <scmCommentPrefix xml:space="preserve">ci: </scmCommentPrefix>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>com.smartling.cc4j</groupId>
+            <artifactId>conventional-commits-maven-plugin</artifactId>
+            <version>0.2.0</version>
+            <inherited>false</inherited>
+            <executions>
+              <execution>
+                <id>version</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>version</goal>
                 </goals>
               </execution>
             </executions>
