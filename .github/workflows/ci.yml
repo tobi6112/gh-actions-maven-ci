@@ -150,7 +150,6 @@ jobs:
           path: reports-unit-tests.zip
           if-no-files-found: ignore
 
-
   analyze:
     name: Analyze
 
@@ -187,8 +186,34 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Verify
+      - name: Analyze with sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -nsu -DskipTests -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        run: mvn -nsu -DskipTests -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
+  checkstyle:
+    name: Checkstyle
+
+    needs: [ info, build ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Update Maven Settings
+        run: mkdir -p ~/.m2 ; cp ${{ env.MAVEN_SETTINGS }} ~/.m2
+
+      - name: Spotless Check
+        run: mvn -nsu -DskipTests -B -Pcheckstyle spotless:check
