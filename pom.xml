@@ -9,18 +9,18 @@
   <name>gh-actions-maven-ci</name>
   <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
 
+  <scm>
+    <developerConnection>scm:git:ssh://git@github.com/tobi6112/gh-actions-maven-ci</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
+  </scm>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <docker.image.prefix>ghcr.io</docker.image.prefix>
   </properties>
-
-  <scm>
-    <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
-    <developerConnection>scm:git:ssh://git@github.com/tobi6112/gh-actions-maven-ci</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
 
   <dependencies>
     <dependency>
@@ -130,10 +130,10 @@
             </configuration>
             <executions>
               <execution>
-                <phase>package</phase>
                 <goals>
                   <goal>dockerBuild</goal>
                 </goals>
+                <phase>package</phase>
               </execution>
             </executions>
           </plugin>
@@ -142,11 +142,6 @@
     </profile>
     <profile>
       <id>checkstyle</id>
-      <activation>
-        <property>
-          <name>checkstyle</name>
-        </property>
-      </activation>
       <build>
         <plugins>
           <plugin>
@@ -180,11 +175,6 @@
     </profile>
     <profile>
       <id>release</id>
-      <activation>
-        <property>
-          <name>release</name>
-        </property>
-      </activation>
       <build>
         <plugins>
           <plugin>
@@ -205,10 +195,10 @@
             <executions>
               <execution>
                 <id>version</id>
-                <phase>verify</phase>
                 <goals>
                   <goal>version</goal>
                 </goals>
+                <phase>verify</phase>
               </execution>
             </executions>
           </plugin>
@@ -216,14 +206,6 @@
             <groupId>com.google.cloud.tools</groupId>
             <artifactId>jib-maven-plugin</artifactId>
             <version>3.1.4</version>
-            <executions>
-              <execution>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>build</goal>
-                </goals>
-              </execution>
-            </executions>
             <configuration>
               <to>
                 <tags>
@@ -231,6 +213,14 @@
                 </tags>
               </to>
             </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+                <phase>deploy</phase>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
