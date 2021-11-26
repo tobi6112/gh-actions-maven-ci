@@ -4,7 +4,7 @@
 
   <groupId>com.github.tobi6112</groupId>
   <artifactId>gh-actions-maven-ci</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.1.3-SNAPSHOT</version>
 
   <name>gh-actions-maven-ci</name>
   <url>https://github.com/tobi6112/gh-actions-maven-ci</url>
