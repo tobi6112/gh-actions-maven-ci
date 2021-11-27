@@ -12,6 +12,9 @@ env:
   JAVA_VERSION: 17
   MAVEN_SETTINGS: .github/settings.xml
 
+# Will build the binaries, run tests and checks on them and if everything succeeds AND it is a push
+# to the main branch will build and deploy a snapshot release of the binaries
+
 jobs:
   # Simply compile the maven project and upload the build
   build:
@@ -152,7 +155,7 @@ jobs:
 
   # And now build and push the docker image
   release:
-    name: Build and push Docker image
+    name: Build and push Docker image (Snapshot release)
 
     # But not on pull requests, only on pushes to main
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
